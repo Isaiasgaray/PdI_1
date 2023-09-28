@@ -30,7 +30,6 @@ def ecualizacion_local_histograma(imagen, tamano_ventana):
 ruta_imagen = 'img/Imagen_con_detalles_escondidos.tif'
 imagen_original = cv2.imread(ruta_imagen, cv2.IMREAD_GRAYSCALE)
 
-
 img1 = ecualizacion_local_histograma(imagen_original, 3)
 img2 = ecualizacion_local_histograma(imagen_original, 3 * 3)
 img3 = ecualizacion_local_histograma(imagen_original, 3 * 9)
@@ -49,4 +48,4 @@ plt.subplot(224, sharex=ax1, sharey=ax1)
 plt.title('Ventana de 27x27')
 plt.imshow(img3, cmap='gray')
 
-plt.show(block=False)
+plt.show()
