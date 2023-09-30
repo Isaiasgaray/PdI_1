@@ -14,7 +14,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def procesar_formulario(path):
 
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -56,19 +55,19 @@ def procesar_formulario(path):
     return img_dict
 
 
-img1 = procesar_formulario('img/formulario_04.png')
+img1 = procesar_formulario('img/formulario_03.png')
 
-plt.imshow(img1['pregunta1'][0], cmap='gray'), plt.show(block=False)
+plt.imshow(img1['pregunta3'][0], cmap='gray'), plt.show(block=False)
 
-num_labels, *_ = cv2.connectedComponentsWithStats(img1['pregunta2'][0].astype(np.uint8), 8, cv2.CV_32S)
+num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(img1['nombre'][0].astype(np.uint8), 8, cv2.CV_32S)
 
-# im_color = cv2.applyColorMap(np.uint8(255/num_labels*labels), cv2.COLORMAP_JET)
+im_color = cv2.applyColorMap(np.uint8(255/num_labels*labels), cv2.COLORMAP_JET)
 
-#for st in stats:
-#    cv2.rectangle(im_color,(st[0],st[1]),(st[0]+st[2],st[1]+st[3]),color=(0,255,0),thickness=1)
+for st in stats:
+    cv2.rectangle(im_color,(st[0],st[1]),(st[0]+st[2],st[1]+st[3]),color=(0,255,0),thickness=1)
 
-# plt.imshow(im_color), plt.show(block=False)
-num_labels
+plt.imshow(im_color), plt.show(block=False)
+
 
 def validar_preguntas(img_dict):
     keys = [f'pregunta{i}' for i in range(1, 4)]
@@ -82,6 +81,16 @@ def validar_preguntas(img_dict):
         if num_l == 3:
             img_dict[key][1] = 1
 
+
+# Ordena puntos 
+stats_sort = stats[stats[:, 0].argsort()]
+
+for row in stats_sort:
+    print(row)
+
+# calculating Euclidean distance
+# using linalg.norm()
+# np.linalg.norm(point1 - point2)
 
 validar_preguntas(img1)
 
