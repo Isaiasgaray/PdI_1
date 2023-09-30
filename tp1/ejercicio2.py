@@ -1,18 +1,17 @@
-# from argparse import ArgumentParser
-# import numpy as np
-# import cv2
-
-# parser = ArgumentParser()
-# parser.add_argument(
-#         'Imgs',
-#          nargs='+',
-#          help='Path de las imágenes')
-
-# args = parser.parse_args()
-
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+from math import dist
+from argparse import ArgumentParser
+from os.path import basename
+# import matplotlib.pyplot as plt
+
+parser = ArgumentParser()
+parser.add_argument(
+        'Imgs',
+        nargs='+',
+        help='Path de las imágenes')
+
+args = parser.parse_args()
 
 def procesar_formulario(path):
 
@@ -54,46 +53,91 @@ def procesar_formulario(path):
 
     return img_dict
 
+def contar_espacios(stats):
+    stats_sort = stats[stats[:, 0].argsort()][1:, :]
 
-img1 = procesar_formulario('img/formulario_03.png')
+    espacios = 0
+    DISTANCIA_MAX = 9
 
-plt.imshow(img1['pregunta3'][0], cmap='gray'), plt.show(block=False)
+    for i in range(len(stats_sort) - 1):
+        primer_punto = (stats_sort[i][0] + stats_sort[i][2], 0)
+        segundo_punto = (stats_sort[i + 1][0], 0)
 
-num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(img1['nombre'][0].astype(np.uint8), 8, cv2.CV_32S)
+        if dist(primer_punto, segundo_punto) >= DISTANCIA_MAX:
+            espacios += 1
 
-im_color = cv2.applyColorMap(np.uint8(255/num_labels*labels), cv2.COLORMAP_JET)
+    return espacios
 
-for st in stats:
-    cv2.rectangle(im_color,(st[0],st[1]),(st[0]+st[2],st[1]+st[3]),color=(0,255,0),thickness=1)
+def connected_components(img):
+    return cv2.connectedComponentsWithStats(
+                img[0].astype(np.uint8),
+                8,
+                cv2.CV_32S)
 
-plt.imshow(im_color), plt.show(block=False)
+def validar_nombre(img_dict):
+    num_labels, _, stats, _ = connected_components(img_dict['nombre'])
+    espacios = contar_espacios(stats)
 
+    if espacios > 0 and (num_labels + espacios - 1) <= 25:
+        img_dict['nombre'][1] = 1
+
+def validar_edad(img_dict):
+    num_labels, _, stats, _ = connected_components(img_dict['edad'])
+    espacios = contar_espacios(stats)
+
+    if (num_labels - 1 + espacios) in [2, 3]:
+        img_dict['edad'][1] = 1
+
+def validar_mail(img_dict):
+    num_labels, _, stats, _ = connected_components(img_dict['mail'])
+    espacios = contar_espacios(stats)
+
+    if num_labels - 1 and espacios == 0 and num_labels - 1 <= 25:
+        img_dict['mail'][1] = 1
+
+def validar_legajo(img_dict):
+    num_labels, _, stats, _ = connected_components(img_dict['legajo'])
+    espacios = contar_espacios(stats)
+
+    if espacios == 0 and num_labels - 1 == 8:
+        img_dict['legajo'][1] = 1
 
 def validar_preguntas(img_dict):
     keys = [f'pregunta{i}' for i in range(1, 4)]
 
     for key in keys:
-        num_l, *_ = cv2.connectedComponentsWithStats(
-                        img_dict[key][0].astype(np.uint8),
-                        8,
-                        cv2.CV_32S)
+        num_l, *_ = connected_components(img_dict[key])
         
         if num_l == 3:
             img_dict[key][1] = 1
 
+def validar_comentarios(img_dict):
+    num_labels, _, stats, _ = connected_components(img_dict['comentarios'])
+    espacios = contar_espacios(stats)
 
-# Ordena puntos 
-stats_sort = stats[stats[:, 0].argsort()]
+    if num_labels - 1 and (num_labels - 1 + espacios) <= 25:
+        img_dict['comentarios'][1] = 1
 
-for row in stats_sort:
-    print(row)
 
-# calculating Euclidean distance
-# using linalg.norm()
-# np.linalg.norm(point1 - point2)
+def validar_imagen(img_dict):
+    funciones = [validar_nombre, validar_edad, validar_mail,
+                 validar_legajo, validar_preguntas, validar_comentarios]
+    
+    for funcion in funciones:
+        funcion(img_dict)
 
-validar_preguntas(img1)
+    for key, (_, val2) in img_dict.items():
+        print(f'{key.capitalize() + ":":<20} {"OK" if val2 else "MAL"}')
 
-img1['pregunta1'][1]
-img1['pregunta2'][1]
-img1['pregunta3'][1]
+# img1 = procesar_formulario('img/formulario_vacio.png')
+# validar_imagen(img1)
+
+for path in args.Imgs:
+    img = procesar_formulario(path)
+
+    if img:
+        print(basename(path))
+        print('=' * 24)
+        validar_imagen(img)
+
+    print()
