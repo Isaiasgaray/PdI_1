@@ -30,7 +30,7 @@ def ecualizacion_local_histograma(imagen, tamano_ventana):
 
     return imagen_resultado
 
-ruta_imagen = r'tp1\img\Imagen_con_detalles_escondidos.tif'
+ruta_imagen = 'img/Imagen_con_detalles_escondidos.tif'
 imagen_original = cv2.imread(ruta_imagen, cv2.IMREAD_GRAYSCALE)
 
 img1 = ecualizacion_local_histograma(imagen_original, 3*3)

@@ -129,9 +129,6 @@ def validar_imagen(img_dict):
     for key, (_, val2) in img_dict.items():
         print(f'{key.capitalize() + ":":<20} {"OK" if val2 else "MAL"}')
 
-# img1 = procesar_formulario('img/formulario_vacio.png')
-# validar_imagen(img1)
-
 for path in args.Imgs:
     img = procesar_formulario(path)
 
