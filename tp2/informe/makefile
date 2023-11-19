@@ -1,6 +1,6 @@
-programa := tp
-template := template-tp.tex
-config   := config.yaml
+programa := ./tp
+template := ../../templates/template-tp.tex
+config   := ./config.yaml
 
 all:
 	pandoc \
