@@ -1,0 +1,36 @@
+---
+documentaclass: article
+fontsize: 12pt
+
+lang: es
+
+# indent: true
+indent: false
+
+colorlinks: true
+
+geometry:
+- margin = 2cm
+- includefoot
+- a4paper
+
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{booktabs}
+- \usepackage{icomma}
+
+titulo: Título trabajo práctico
+# tema: Tema trabajo práctico
+carrera: FCEIA
+materia: Materia
+# comision: "Comisión #"
+# fecha: Mes, año.
+
+integrante:
+- Integrante 1.
+- Integrante 2.
+
+docente:
+- Docente 1.
+- Docente 2.
+---

@@ -1,9 +1,6 @@
-from utils.calculas_factor_forma import calcular_factor_forma
-from utils.contar_circulos import contar_circulos
-from utils.graficar_caja import graficar_caja
-from utils.rellenar import rellenar
 import matplotlib.pyplot as plt
 import numpy as np
+import imutils
 import cv2
 
 # Carga de imagen
@@ -16,22 +13,31 @@ img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 # a) Procesar la imagen de manera de segmentar las
 # monedas y los dados de manera automática.
 blur      = cv2.GaussianBlur(img_gray, (3, 3), 2)
-img_canny = cv2.Canny(blur, 50, 200)
+img_canny = cv2.Canny(blur, 255*0.40, 255*0.70)
 plt.imshow(img_canny, cmap='gray'), plt.show()
 
 elemento_dilatacion = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (35, 45))
 img_dil = cv2.dilate(img_canny, elemento_dilatacion)
-plt.imshow(img_dil, cmap='gray'), plt.show()
-img_dil = rellenar(img_dil)
-plt.imshow(img_dil, cmap='gray'), plt.show()
+ax = plt.subplot(221)
+plt.title('Dilatación - Elipse 35x45')
+plt.imshow(img_dil, cmap='gray')
+img_dil = imutils.rellenar(img_dil)
+plt.subplot(222)
+plt.title('Rellenado de bordes')
+plt.imshow(img_dil, cmap='gray')
 
 elemento_erosion = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
 img_er = cv2.erode(img_dil, elemento_erosion)
-plt.imshow(img_er, cmap='gray'), plt.show(block=False)
+plt.subplot(223)
+plt.title('Erosión - Rectangulo de 10x10')
+plt.imshow(img_er, cmap='gray')
 
 elemento_cierre = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (40, 40))
 img_cierre = cv2.morphologyEx(img_er, cv2.MORPH_OPEN, elemento_cierre)
-plt.imshow(img_cierre, cmap='gray'), plt.show(block=False)
+plt.subplot(224)
+plt.title('Operación de apertura - Elipse de 40x40')
+plt.imshow(img_cierre, cmap='gray')
+plt.show()
 
 # Contamos los objetos de la máscara
 n, labels, stats, _ = cv2.connectedComponentsWithStats(img_cierre)
@@ -51,16 +57,9 @@ DADOS_C   = (0, 255, 0)
 for i in range(1, n):
    obj = (labels == i).astype('uint8') * 255
 
-   coor_h = stats[i][cv2.CC_STAT_LEFT] 
-   coor_v = stats[i][cv2.CC_STAT_TOP]
+   sub_imagen = imutils.obtener_sub_imagen(img_gray, stats[i])
 
-   ancho  = stats[i][cv2.CC_STAT_WIDTH]   
-   largo  = stats[i][cv2.CC_STAT_HEIGHT]
-
-   sub_imagen = \
-         img_gray[coor_v:coor_v + largo, coor_h: coor_h + ancho]
-
-   rho = calcular_factor_forma(obj)
+   rho = imutils.calcular_factor_forma(obj)
 
    if rho >= RHO_TH:
       masc_monedas[obj == 255,] = MONEDAS_C
@@ -132,11 +131,12 @@ ejercicio_c = img_rgb.copy()
 COLOR_TEXTO = (255, 255, 255)
 
 for dado in dados:
-   n = contar_circulos(dado[0])
-   graficar_caja(ejercicio_c,
-                 dado[1],
-                 color=COLOR_TEXTO,
-                 box=False,
-                 text=str(n))
+   n = imutils.contar_circulos(dado[0])
+
+   imutils.graficar_caja(ejercicio_c,
+                        dado[1],
+                        color=COLOR_TEXTO,
+                        box=False,
+                        text=str(n))
    
 plt.imshow(ejercicio_c), plt.title('Ejercicio 1 c'), plt.show()
