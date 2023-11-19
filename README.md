@@ -27,3 +27,26 @@ Al ejercicio 2 hay que pasarle las imágenes cuando se ejecuta. Las imágenes de
 ```
 $ python3 ejercicio2.py img/formulario_0*
 ```
+
+# TP 2
+
+* Crear un entorno virtual en el directorio `tp2`
+
+```
+$ cd tp2
+$ python3 -m venv venv
+```
+
+* Activar el entorno virtual e instalar las librerías
+
+```
+$ source venv/bin/activate
+$ pip install -r requirements.txt
+```
+
+* Correr los ejercicios
+
+```
+$ python3 ejercicio1.py
+$ python3 ejercicio2.py
+```
