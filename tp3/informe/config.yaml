@@ -1,0 +1,39 @@
+---
+documentaclass: article
+fontsize: 12pt
+
+lang: es
+
+# indent: true
+indent: false
+
+colorlinks: true
+
+geometry:
+- margin = 2cm
+- includefoot
+- a4paper
+
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{booktabs}
+- \usepackage{icomma}
+
+titulo: Trabajo práctico 3
+# tema: Tema trabajo práctico
+carrera: FCEIA
+materia: Procesamiento de Imágenes 1
+# comision: "Comisión #"
+fecha: Diciembre, 2023.
+
+integrante:
+- Garay Gorta, Isaías.
+- Leguiza, Claudia.
+- Petetta, Nicola.
+- Segui, Eduardo.
+
+docente:
+- Álvarez, Julián.
+- Reyes, Facundo.
+- Sad, Gonzalo.
+---
