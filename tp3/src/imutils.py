@@ -11,26 +11,6 @@ def calcular_factor_forma(img):
    rho = 4 * np.pi * area /(perimeter ** 2)
    return rho
 
-def contar_circulos(imagen):
-   '''
-   Recibe una imagen y devuelve la cantidad de círculos que hay en ella.
-   '''
-   imagen = cv2.medianBlur(imagen, 7)
-
-   circles = cv2.HoughCircles(imagen,
-                              cv2.HOUGH_GRADIENT,
-                              1, 20,
-                              param1=50, param2=50,
-                              minRadius=20, maxRadius=50)
-
-   n = 0
-
-   if isinstance(circles, np.ndarray):
-      n = len(circles[0])
-
-   return n
-
-
 def contar_contornos(img_bin):
    '''
    Recibe una imagen binaria y devuelve la cantidad
@@ -86,15 +66,19 @@ def obtener_sub_imagen(img, stats):
 
     return img[coor_v:coor_v + largo, coor_h: coor_h + ancho]
 
-def rellenar(img):
-   '''
-   Recibe una imagen binaria, devuelve la misma imagen con
-   las formas huecas rellenas.
-   '''
-   img_flood_fill = img.copy().astype('uint8')
-   h, w = img.shape[:2]
-   mask = np.zeros((h+2, w+2), np.uint8)
-   cv2.floodFill(img_flood_fill, mask, (0,0), 255)
-   img_flood_fill_inv = cv2.bitwise_not(img_flood_fill)
-   img_fh = img | img_flood_fill_inv
-   return img_fh 
+def leer_video(path):
+    '''
+    Recibe un path a un video y devuelve
+    el objeto necesario para iterar sobre sus
+    frames y otras variable con información del video.
+
+    Devuelve:
+    cap, width, height, fps, n_frames
+    '''
+    cap      = cv2.VideoCapture(path)
+    width    = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
+    height   = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps      = int(cap.get(cv2.CAP_PROP_FPS))
+    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    return cap, width, height, fps, n_frames
