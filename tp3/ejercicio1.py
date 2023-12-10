@@ -29,6 +29,11 @@ K_SIZE = (3, 2)
 # en los centroides
 UMBRAL_DIF = 0.6
 
+# Cantidad mínima de frames iguales
+# para considerar que los dados
+# están quietos.
+MIN_CANT_FRAMES = 2
+
 # Funciones auxiliares
 # =========================
 
@@ -36,7 +41,7 @@ def crear_mascara_dados(frame_hsv, umbral_matiz, umbral_intensidad):
     '''
     Recibe un frame de los dados con mapa de colores HSV y
     los umbrales para los canales H y S, devuelve la máscara
-    para de los dados para el frame recibido
+    para de los dados para el frame recibido.
     '''
     h, s, _ = cv2.split(frame_hsv)
 
@@ -69,34 +74,36 @@ def procesar_frame(frame):
 def filtrar_dados(n, labels, stats, centroids):
     '''
     Recibe el output de connectedComponentsWithStats,
-    devuelve una lista de posibles dados y otra con 
-    los centroides de esos dados.
+    devuelve una lista de posibles dados y otra 
+    con los centroides de estos.
     '''
     
-    posibles_dados       = list()
-    centroides_actuales  = list()
+    posibles_dados = list()
+    centroides     = list()
 
     for i in range(1, n):
 
         img_bool = (labels == i).astype('uint8')
 
+        # Filtrado por área
         if stats[i][cv2.CC_STAT_AREA] < AREA_MIN:
             continue
 
         rho = imutils.calcular_factor_forma(img_bool)
 
+        # Filtrado por factor de forma
         if rho < RHO_TH:
             continue
 
         posibles_dados.append((stats[i], img_bool))
-        centroides_actuales.append(centroids[i])
+        centroides.append(centroids[i])
 
-    return posibles_dados, centroides_actuales
+    return posibles_dados, centroides
 
 def graficar_dados(tuplas_dados, frame, dados_c, texto_c):
     '''
     Función para graficar los bounding box
-    y números de cada dado
+    y números de cada dado.
     '''
     for tupla in tuplas_dados:
         stats_dado, dado_bool = tupla
@@ -147,26 +154,25 @@ def procesar_video(path):
         
         centroides_actuales = list()
 
-        dados, centroides_actuales = filtrar_dados(n,
-                                                   labels, 
-                                                   stats,
-                                                   centroids)
+        dados, centroides_actuales = filtrar_dados(n, labels, 
+                                                   stats, centroids)
 
-        resultados = [
-            abs(dado_act[0] - dado_prev[0]) < UMBRAL_DIF
-            for dado_act, dado_prev in 
-            zip(centroides_actuales, centroides_anteriores)]
+        # Lista de valores booleanos, representan que la diferencia
+        # en el eje x de los centroides es menor a cierto umbral.
+        diferencias_eje_x = [
+                abs(dado_act[0] - dado_prev[0]) < UMBRAL_DIF
+                for dado_act, dado_prev in 
+                zip(centroides_actuales, centroides_anteriores)]
 
-        if len(resultados) == 5 and all(resultados):
+        # Si hay cinco diferencias y todas cumplen la condicion
+        # entonces consideramos que los dados están quietos.
+        if len(diferencias_eje_x) == 5 and all(diferencias_eje_x):
             frames_consecutivos += 1
         else:
             frames_consecutivos = 0
 
-        if frames_consecutivos >= 2:
-            graficar_dados(dados,
-                        frame,
-                        DADOS_C,
-                        TEXTO_C)
+        if frames_consecutivos >= MIN_CANT_FRAMES:
+            graficar_dados(dados, frame, DADOS_C, TEXTO_C)
             
         cv2.imshow(f'{file_name}', frame)
         out.write(frame)
