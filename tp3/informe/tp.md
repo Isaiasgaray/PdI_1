@@ -17,3 +17,6 @@ Ahora podemos usar `connectedComponents` para iterar sobre los objetos de la úl
 
 ![Detalle de un dado](img/img2.png)
 
+## Detectar cuando se detienen los dados
+
+Para lograr esto usamos guardamos los centroides de los dados en el *frame* anterior y en el actual, calculamos la resta en el eje $x$ de los centroides del mismo dado y si esta diferencia es menor a cierto umbral consideramos que los dado no se movieron. Cuando los cinco dados no se mueven durante dos frames o más se dibujan los *bounding box* correspondientes en ese frame.
